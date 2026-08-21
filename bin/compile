@@ -1,23 +1,34 @@
 #!/bin/bash
 
+# Map Scalingo stack names to their Heroku equivalents (same Ubuntu base)
+# so the S3 download URL resolves correctly.
+resolve_stack() {
+    case "$STACK" in
+        scalingo-22) echo "heroku-22" ;;
+        scalingo-24) echo "heroku-22" ;;
+        scalingo-26) echo "heroku-24" ;;
+        *)           echo "$STACK" ;;
+    esac
+}
+
 vendor_lib() {
     LIBRARY=$1
     VERSION=$2
     VENDOR_DIR=$3
 
     echo "-----> Installing $LIBRARY-$VERSION"
-    LIBRARY_URL="https://heroku-buildpack-geo.s3.amazonaws.com/heroku-20/${LIBRARY}/${LIBRARY}-${VERSION}.tar.gz"
+    RESOLVED_STACK=$(resolve_stack)
+    LIBRARY_URL="https://heroku-buildpack-geo.s3.amazonaws.com/${RESOLVED_STACK}/${LIBRARY}/${LIBRARY}-${VERSION}.tar.gz"
 
     mkdir -p "$VENDOR_DIR"
     if ! curl "${LIBRARY_URL}" -s | tar zxv -C "$VENDOR_DIR" &> /dev/null; then
-      echo " !     Requested $LIBRARY Version ($VERSION) is not available for this stack ($STACK)."
+      echo " !     Requested $LIBRARY Version ($VERSION) is not available for this stack ($STACK → $RESOLVED_STACK)."
       echo " !     See: https://github.com/heroku/heroku-geo-buildpack#available-versions"
       echo " !     Aborting."
       exit 1
     fi
 
     mkdir -p "$CACHE_DIR/.heroku-geo-buildpack/"
-    # Store library version for future reference
     echo "$VERSION" > "$CACHE_DIR/.heroku-geo-buildpack/$LIBRARY-version"
 }
 
@@ -28,14 +39,9 @@ BP_DIR=$(cd "$(dirname "${0:-}")" || exit 1 ; cd ..; pwd)
 
 VENDOR_DIR="$BUILD_DIR/.heroku-geo-buildpack/vendor"
 
-DEFAULT_GDAL_VERSION="3.5.0"
-DEFAULT_GEOS_VERSION="3.10.2"
-DEFAULT_PROJ_VERSION="8.2.1"
-
-if [[ "${STACK}" == "heroku-18" ]]; then
-    # Newer GEOS requires CMake 3.13+ which isn't available on Ubuntu 18.04.
-    DEFAULT_GEOS_VERSION="3.7.2"
-fi
+DEFAULT_GDAL_VERSION="3.12.3"
+DEFAULT_GEOS_VERSION="3.14.1"
+DEFAULT_PROJ_VERSION="9.8.1"
 
 if [ -f "$ENV_DIR/GDAL_VERSION" ]; then
     GDAL_VERSION=$(cat "$ENV_DIR/GDAL_VERSION")
@@ -82,7 +88,6 @@ vendor_lib "PROJ" "$PROJ_VERSION" "$VENDOR_DIR"
 PROFILE_PATH="$BUILD_DIR/.profile.d/heroku-geo-buildpack.sh"
 mkdir -p "$(dirname "$PROFILE_PATH")"
 
-# Export vars
 # shellcheck disable=SC2016
 {
   echo 'export GDAL_LIBRARY_PATH="$HOME/.heroku-geo-buildpack/vendor/lib/libgdal.so"'
