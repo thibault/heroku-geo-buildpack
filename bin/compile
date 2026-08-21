@@ -5,7 +5,7 @@
 resolve_stack() {
     case "$STACK" in
         scalingo-22) echo "heroku-22" ;;
-        scalingo-24) echo "heroku-22" ;;
+        scalingo-24) echo "heroku-24" ;;
         scalingo-26) echo "heroku-24" ;;
         *)           echo "$STACK" ;;
     esac
