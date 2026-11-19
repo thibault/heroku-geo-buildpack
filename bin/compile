@@ -9,7 +9,7 @@ vendor_lib() {
     LIBRARY_URL="${ARCHIVES_URL}/${HEROKU_STACK}/${LIBRARY}/${LIBRARY}-${VERSION}.tar.gz"
 
     mkdir -p "$VENDOR_DIR"
-    if ! curl -sSf --retry 3 --retry-connrefused --connect-timeout 10 "${LIBRARY_URL}" | tar -zx -C "${VENDOR_DIR}"; then
+    if ! curl -sSfL --retry 3 --retry-connrefused --connect-timeout 10 "${LIBRARY_URL}" | tar -zx -C "${VENDOR_DIR}"; then
       echo " !     Error: ${LIBRARY} version '${VERSION}' is not available for this stack (${HEROKU_STACK})." >&2
       echo " !     Try requesting a different version using the env var '${LIBRARY}_VERSION', or" >&2
       echo " !     unset the env var and clear the build cache to use the default version." >&2
