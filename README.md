@@ -36,6 +36,11 @@ version used by the last successful build (unless the
 You can change the version of each library that will be installed by setting the
 `GDAL_VERSION`, `GEOS_VERSION` or `PROJ_VERSION` config variables.
 
+To install versions built elsewhere, set the `GEO_ARCHIVES_URL` config variable to the
+address of a host that serves the archives as `<url>/<stack>/<LIBRARY>/<LIBRARY>-<version>.tar.gz`,
+for example `<url>/heroku-24/GDAL/GDAL-3.13.3.tar.gz`. Scalingo stacks download the archives
+of the Heroku stack with the same number.
+
 Available Versions
 ------------------
 
