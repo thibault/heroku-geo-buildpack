@@ -41,6 +41,16 @@ address of a host that serves the archives as `<url>/<stack>/<LIBRARY>/<LIBRARY>
 for example `<url>/heroku-24/GDAL/GDAL-3.13.3.tar.gz`. Scalingo stacks download the archives
 of the Heroku stack with the same number.
 
+To build an archive, for example GDAL for heroku-24:
+
+```
+$ make buildenv STACK_VERSION=24
+$ docker run --rm -it -v "${PWD}/upload:/tmp/upload" geo-buildenv-24 ./gdal.sh X.Y.Z
+```
+
+The archive lands in `upload/heroku-24/GDAL/GDAL-X.Y.Z.tar.gz`. To serve it from this
+repository, attach it to the release tagged `heroku-24/GDAL`.
+
 Available Versions
 ------------------
 
